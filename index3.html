@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="lib/vue2.js" charset="UTF-8"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <title>Title</title>
+</head>
+<body>
+    <div class="container" id="render">
+        <h1>Пример виджета на vue.js v2</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div style="padding: 10px; margin: 5px" v-bind:style="{background: '#' + colorBg, color: '#' + colorFont}">
+                    Пример
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-7">
+                <div class="form-horizontal">
+                    <select-color
+                            title="Цвет фона"
+                            :in-data="colorBg"
+                            name="colorBg"
+                            v-on:update="updateColor">
+                    </select-color>
+
+                    <select-color
+                            title="Цвет шрифта"
+                            :in-data="colorFont"
+                            name="colorFont"
+                            v-on:update="updateColor">
+                    ></select-color>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/x-template" id="template-component-select-color">
+        <div class="form-group">
+            <label class="col-md-3 control-label">
+                {{title}}
+            </label>
+            <div class="col-md-2">
+                <input type="text" class="form-control" v-model="showColor">
+            </div>
+
+            <div class="col-md-2">
+                <input class="example form-control" type="color" id="html5colorpicker" v-model="modelColor">
+            </div>
+
+            <div class="col-md-3">
+                <a class="link-default-color" href="#"
+                   title="Установить цвет по умолчанию"
+                   v-on:click="clickDefaultColor($event)"
+                   v-show="modelColor !== defaultColor">По умолчанию</a>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/javascript">
+        // register
+        Vue.component('select-color', {
+            template: '#template-component-select-color',
+            props: ['name', 'title', 'inData', 'default'],
+
+            data: function () {
+                return {
+                    showColor: undefined,
+                    modelColor: this.inData,
+                    defaultColor: this.default
+              }
+            },
+
+            // методы
+            methods: {
+                /**
+                 * Нормализуем HEX цвета. Удаляем решутку и в верхний регистр
+                 * @param val
+                 * @returns {string}
+                 * @private
+                 */
+                _normColor: function (val) {
+                    return val.replace(/#/g, '').toUpperCase()
+                },
+
+                /**
+                 * Изменился HEX цвет который выводим
+                 * @param val
+                 */
+                setShowColor: function (val) {
+                    this.modelColor = '#' + this._normColor(val);
+                    this.$emit('update',  this.name, val);
+                },
+
+                /**
+                 * Изменился HEX цвет который в моделе
+                 * @param val
+                 */
+                setModelColor: function (val) {
+                    var normColor = this._normColor(val);
+
+                    //this.model = normColor; // Передаем во внеший мир
+                    this.showColor = normColor;
+                    this.modelColor = '#' + normColor;
+
+                    // установили цвет по умолчанию
+                    if (typeof this.defaultColor == "undefined") {
+                        this.defaultColor = this.modelColor;
+                    }
+                },
+
+                // Цвет по умолчанию
+                clickDefaultColor: function (e) {
+                    e.preventDefault();
+                    this.modelColor = this.defaultColor;
+                }
+            },
+
+            // Готов к рендеру
+            mounted: function () {
+                this.$nextTick(function () {
+                    this.$watch('modelColor', this.setModelColor);
+                    this.$watch('showColor', this.setShowColor);
+                    this.showColor = this.modelColor;
+                });
+            }
+        });
+
+        // create a root instance
+        new Vue({
+            el: '#render',
+            data: {
+                colorBg:    'FAFAAF',
+                colorFont:  'FF0000',
+            },
+            methods: {
+                updateColor: function (name, value) {
+                    this[name] = value;
+                }
+            }
+        })
+    </script>
+</body>
+</html>

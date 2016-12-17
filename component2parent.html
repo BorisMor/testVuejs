@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="lib/vue2.js" charset="UTF-8"></script>
+    <title>Title</title>
+</head>
+<body>
+
+vue.js 2.0 - Пример передачи данных из компонента
+
+<div id="render">
+    <input-test :show="message" name="message" v-on:update="updateMessage"></input-test>
+    {{message}}
+</div>
+
+<script type="text/x-template" id="tmp-test-component">
+    <input v-model="showValue" type="text" v-on:input="updateDataShow">
+</script>
+
+<script type="text/javascript">
+
+    Vue.component('input-test', {
+        template: '#tmp-test-component',
+        props: ["show", "name"],
+        data: function () {
+            return {
+                showValue: this.show
+            }
+        },
+        methods: {
+            updateDataShow: function (event) {
+                this.$emit('update',  this.name, event.target.value);
+            }
+        }
+    });
+
+    new Vue({
+        el: '#render',
+        data: {
+            message: 'hello!'
+        },
+        methods: {
+            updateMessage: function (name, value) {
+                this[name] = value
+            }
+        }
+    })
+</script>
+
+</body>
+</html>
